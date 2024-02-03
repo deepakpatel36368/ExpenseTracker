@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Dashboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h2>Expense Dashboard</h2>
+<p th:text="${user.username}" style="color: red;"></p>
+<p th:text="${user.email}" style="color: red;"></p>
+<table>
+    <thead>
+    <tr>
+        <th>Expense ID</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Action</th> <!-- Added Action column for delete button -->
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Iterate over the list of expenses and display each expense in a row -->
+    <tr th:each="expense : ${expenseList}">
+        <td th:text="${expense.expenseId}"></td>
+        <td th:text="${expense.category}"></td>
+        <td th:text="${expense.description}"></td>
+        <td th:text="${expense.amount}"></td>
+        <td th:text="${expense.date}"></td>
+        <td>
+            <!-- Form for deleting an expense -->
+            <form id="deleteForm" th:action="@{/api/expense/delete/{expenseId}(expenseId=${expense.expenseId})}" method="post">
+                <input type="hidden" name="_method" value="delete"> <!-- Use POST with hidden method field for DELETE request -->
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteForms = document.querySelectorAll('#deleteForm');
+
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // Include any additional data if required
+                    })
+                });
+                if (response.ok) {
+                    // Remove the corresponding expense row from the table
+                    form.closest('tr').remove();
+                } else {
+                    console.error('Failed to delete expense');
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
